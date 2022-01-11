@@ -1,0 +1,176 @@
+
+yum update
+yum install java-1.8*
+$(dirname $(dirname $(readlink -f $(which javac))))
+vi .bash_profile
+JAVA_HOME= /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.312.b07-1.amzn2.0.2.x86_64:
+
+/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.312.b07-1.amzn2.0.2.x86_64:
+PATH=$JAVA_HOME
+install jenkins
+
+download and install mavan
+wget https://dlcdn.apache.org/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.tar.gz
+vi .bash_profile
+M2_HOME=/opt/maven
+M2=/opt/maven/bin
+PATH=$M2_HOME:$M2
+
+
+
+
+
+node{
+   stage('SCM Checkout'){
+     git 'https://github.com/shankar0203/my-app.git'
+   }
+   stage('Compile-Package'){
+
+      def mvnHome =  tool name: 'maven', type: 'maven'   
+      sh "${mvnHome}/bin/mvn clean package"
+	  sh 'mv target/myweb*.war target/newapp.war'
+	  
+   }
+    stage('Build Docker Imager'){
+   sh 'docker build -t shankar/myweb:0.0.2 .'
+   }
+    stage('Docker Image Push'){
+   withCredentials([string(credentialsId: 'dockerPass', variable: 'dockerPassword')]) {
+   sh "docker login -u 922116106069 -p ${dockerPassword}"
+    }
+   sh 'docker push shankar/myweb:0.0.2'
+   }
+}
+
+
+https://github.com/shankar0203/my-app.git
+
+
+
+node{
+   stage('SCM Checkout'){
+     git 'https://github.com/shankar0203/my-app.git'
+   }
+   stage('Compile-Package'){
+
+      def mvnHome =  tool name: 'maven', type: 'maven'   
+      sh "${mvnHome}/bin/mvn clean package"
+	  sh 'mv target/myweb*.war target/newapp.war'
+	  
+   }
+    stage('Build Docker Imager'){
+   sh 'docker build -t 922116106069/myweb:0.0.2.'
+   }
+    stage('Docker Image Push'){
+   withCredentials([usernameColonPassword(credentialsId: 'dockerlogin', variable: 'USERPASS')]) {
+   sh '''
+     set +x
+     curl -u "$USERPASS" https://login.docker.com/u/login/identifier?state=hKFo2SBvTkJId3VtUWc0SDhDMGg1SElXVGV2V0hlOE13X3NPbaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDNMTXZhZTNWQUxBV1JzYWRQVWU5Q0VjOVBkek9HOXlwo2NpZNkgbHZlOUdHbDhKdFNVcm5lUTFFVnVDMGxiakhkaTluYjk
+   sh 'docker push 922116106069/myweb:0.0.10'
+   '''
+   }
+}
+}
+
+
+
+
+node{
+   stage('SCM Checkout'){
+     git 'https://github.com/shankar0203/my-app.git'
+   }
+   stage('Compile-Package'){
+
+      def mvnHome =  tool name: 'maven', type: 'maven'   
+      sh "${mvnHome}/bin/mvn clean package"
+	  sh 'mv target/myweb*.war target/newapp.war'
+	  
+   }
+    stage('Build Docker Imager'){
+   sh 'docker build -t 922116106069/myweb:0.0.2.'
+   }
+    stage('Docker Image Push'){
+   withCredentials([usernameColonPassword(credentialsId: 'dockerlogin', variable: 'USERPASS')]) {
+   sh '''
+     set +x
+     curl -u "$USERPASS" https://login.docker.com/u/login/identifier?state=hKFo2SBvTkJId3VtUWc0SDhDMGg1SElXVGV2V0hlOE13X3NPbaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDNMTXZhZTNWQUxBV1JzYWRQVWU5Q0VjOVBkek9HOXlwo2NpZNkgbHZlOUdHbDhKdFNVcm5lUTFFVnVDMGxiakhkaTluYjk
+   sh 'docker push 922116106069/myweb:0.0.2.'
+   '''
+   }
+    }
+}
+
+
+
+
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                // Get some code from a GitHub repository
+                git url: 'https://github.com/naiveskill/devops.git', branch: 'main'
+            }
+        }
+    }
+}
+
+
+54.211.69.90
+
+node{
+   stage('SCM Checkout'){
+     git 'https://github.com/javahometech/my-app'
+   }
+   stage('Compile-Package'){
+      // Get maven home path
+      def mvnHome =  tool name: 'maven-3', type: 'maven'   
+      sh "${mvnHome}/bin/mvn package"
+   }
+   stage('Deploy to Tomcat'){
+      
+      sshagent(['tomcat-dev']) {
+         sh 'scp -o StrictHostKeyChecking=no target/*.war ec2-user@172.31.29.242:/opt/tomcat8/webapps/'
+      }
+   }
+
+
+
+
+
+
+pipeline{
+  agent any
+  tools {
+  maven 'maven3'
+}
+  stages{
+    stage("SCM Checkout"){
+      steps{
+        git credentialsId: '5243e135-536c-499f-9a11-b08bf8cdfe8f', 
+          url: 'https://github.com/deepashre/simple-app.git'
+      }
+    }
+    stage("Maven Build"){
+      steps{
+        sh'mvn clean package'
+      }
+    }
+    stage("Dev-Deploy"){
+      steps{
+        sshagent(['Tomcat_server-1']) {
+        sh "scp -o StrictHostKeyChecking=no target/simple-app-3.0.0-SNAPSHOT.war ec2-user@172.31.81.33:/opt/tomcat/apache-tomcat-9.0.56/webapps/simple-app.war"
+        sh "ssh ec2-user@172.31.81.33 /opt/tomcat/apache-tomcat-9.0.56/bin/shutdown.sh"
+        sh "ssh ec2-user@172.31.81.33 /opt/tomcat/apache-tomcat-9.0.56/bin/startup.sh"
+       }   
+    }
+  }
+}
+}
+
+
+echo "Build number is ${currentBuild.number}"
+
+
+
+
